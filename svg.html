@@ -1,0 +1,90 @@
+<head lang="en">
+    <title></title>
+    <script src="js/d3.v3.min.js" charset="utf-8"></script>
+    <script src="js/live.js" charset="utf-8"></script>
+</head>
+
+<body>
+<svg width="1024" height="560" style="background-color: #204d74">
+    <!--<g>-->
+    <rect x="10" y="20" height="250" width="300" style="fill: #080808"></rect>
+
+    <text x="15" y="45" font-family="Verdana" font-size="15" fill="blue" > Drag From Here</text>
+    <rect class="drg" x="12" y="55" initial-x="12" initial-y="55" height="50" width="50" style="fill: #f0ad4e"></rect>
+
+
+    <!--</g>-->
+    <rect x="10" y="280" height="250" width="300" style="fill: #080808"></rect>
+
+        <rect class="drg" x="12" y="310" initial-x="12" initial-y="282" height="50" width="50" style="fill: #f0ad4e"></rect>
+       <text x="15" y="300" font-family="Verdana" font-size="15" fill="blue" > Drag From Here </text>
+
+
+    <rect x="320" y="20" height="510" width="690" style="fill: #080808"></rect>
+    <text x="325" y="40" font-family="Verdana" font-size="15" fill="blue" > Drop Here </text>
+
+
+    <rect x="900" y="30" height="100" width="100" style="fill: yellow"></rect>
+
+</svg>
+<script>
+    function move() {
+        d3.select(this)
+                .attr('x', d3.event.x - parseInt(d3.select(this).attr("width")) / 2)
+                .attr('y', d3.event.y - parseInt(d3.select(this).attr("height")) / 2);
+        this.parentNode.appendChild(this);
+    };
+
+    d3.selectAll(".drg").style("fill","red")
+            .call(
+            d3.behavior.drag()
+                    .on('drag', move).origin(function() {
+                        var t = d3.select(this);
+                        return {x: t.attr("x"), y: t.attr("y")};
+                    })
+                    .on('dragend', function(d){
+                        var elem = d3.select(this);
+                        elem.attr("x",elem.attr("initial-x"));
+                        elem.attr("y",elem.attr("initial-y"));
+                        console.log(elem.attr("x"));
+                        var mouseCoordinates = d3.mouse(this);
+                        if(mouseCoordinates[0] > 320) {
+                            //Append new element
+                            d3.select("svg").append("rect")
+                                    .classed("drg", true)
+                                    .attr("width", 50)
+                                    .attr("height", 50)
+                                    .attr("x", mouseCoordinates[0])
+                                    .attr("y", mouseCoordinates[1])
+                                    .attr('initial-x', mouseCoordinates[0])
+                                    .attr('initial-y', mouseCoordinates[1])
+                                    .style("fill", "green")
+                                    .call(d3.behavior.drag().on('drag',move).on('dragend',function(){
+                                        var mouseCoordinates = d3.mouse(this);
+                                        console.log('-----------');
+                                        console.log(mouseCoordinates[0]);
+                                        console.log(mouseCoordinates[1]);
+                                        console.log('-----------');
+
+                                        if(mouseCoordinates[0] >= 925 && mouseCoordinates[1]<= 105){
+                                            var ip = confirm('Are you sure you wanna delete the item? ');
+                                            if(ip == true){
+                                                this.remove();
+                                            }else{
+                                                var elem = d3.select(this);
+                                                elem.attr("x",elem.attr("initial-x"));
+                                                elem.attr("y",elem.attr("initial-y"));
+
+                                            }
+                                        }else if(mouseCoordinates[0]<320 || mouseCoordinates[1]<=44 || mouseCoordinates[0]>= 980){
+                                            var elem = d3.select(this);
+                                            elem.attr("x",elem.attr("initial-x"));
+                                            elem.attr("y",elem.attr("initial-y"));
+                                        }
+                                    }));
+
+                        }
+                    })
+    )
+
+</script>
