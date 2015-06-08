@@ -16,8 +16,13 @@
 </head>
 <body>
 
+<div id="elem-right-click" style="display: none; width:40px; height: 100px">
+    <button type="button" name="name" value="delete" >Delete</button>
+</div>
 
 <script>
+
+
     var svgCanvasH = 560, svgCanvasW = 1024;
 
     var operatorsConfig = {
@@ -106,25 +111,9 @@
             .attr('width',drawingConfig.width)
             .style('fill',drawingConfig.background);
 
-    var remove = mainLayout
-            .append('rect')
-            .attr('x', 910)
-            .attr('y', 30)
-            .attr('width', 90)
-            .attr('height', 90)
-            .style('fill', 'red')
 
-    var removeTitle = mainLayout
-            .append('text')
-            .attr('x', 910+20)
-            .attr('y', 30+22)
-            .text('Delete')
-            .style({
-                'font-size':20,
-                'fill':'blue'
-            });
 
-    var icons = ['filter.png', 'join.png', 'pattern.png', 'sequence.png', 'windows.png'];
+    var icons = ['filter.png', 'join.png', 'pattern.png', 'sequence.png', 'windows.png',];
 
     var W = operatorsConfig.width; var H=operatorsConfig.height;
     var x = 25, y=45, w=35, h=40;
@@ -179,21 +168,40 @@
                                     .attr('y', mouseLoc[1])
                                     .attr('initial-y', mouseLoc[1])
                                     .attr('xlink:href', elem.attr('href'))
+                                    .on('contextmenu', function(d, i){
+                                        var curElem = d3.select(this);
+                                        d3.event.preventDefault();
+//                                        alert('right click disabled');
+                                        var position = d3.mouse(this);
+                                        d3.select('#elem-right-click')
+                                                .style('position', 'absolute')
+                                                .style('left', position[0] + "px")
+                                                .style('top', position[1] + "px")
+                                                .style('display', 'block')
+                                                .on('click', function(d, i){
+                                                    curElem.remove();
+                                                    d3.select(this).style('display', 'none');
+                                                })
+                                        ;
+
+
+                                    })
                                     .call(d3.behavior.drag()
                                             .on('drag', move)
                                             .on('dragend', function(){
                                                 var mouseCoordinates = d3.mouse(this);
-                                                if(mouseCoordinates[0] >= 925 && mouseCoordinates[1]<= 105){
-                                                    var ip = confirm('Are you sure you wanna delete the item? ');
-                                                    if(ip == true){
-                                                        this.remove();
-                                                    }else{
-                                                        var elem = d3.select(this);
-                                                        elem.attr("x",elem.attr("initial-x"));
-                                                        elem.attr("y",elem.attr("initial-y"));
-
-                                                    }
-                                                }else if(mouseCoordinates[0]<320 || mouseCoordinates[1]<=44 || mouseCoordinates[0]>= 980 || mouseCoordinates[1]>= 500){
+//                                                if(mouseCoordinates[0] >= 925 && mouseCoordinates[1]<= 105){
+//                                                    var ip = confirm('Are you sure you wanna delete the item? ');
+//                                                    if(ip == true){
+//                                                        this.remove();
+//                                                    }else{
+//                                                        var elem = d3.select(this);
+//                                                        elem.attr("x",elem.attr("initial-x"));
+//                                                        elem.attr("y",elem.attr("initial-y"));
+//
+//                                                    }
+//                                                }else
+                                                if(mouseCoordinates[0]<320 || mouseCoordinates[1]<=44 || mouseCoordinates[0]>= 980 || mouseCoordinates[1]>= 500){
                                                     var elem = d3.select(this);
                                                     elem.attr("x",elem.attr("initial-x"));
                                                     elem.attr("y",elem.attr("initial-y"));
