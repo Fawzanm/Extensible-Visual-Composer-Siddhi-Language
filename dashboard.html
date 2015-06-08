@@ -179,8 +179,14 @@
                                                 .style('top', position[1] + "px")
                                                 .style('display', 'block')
                                                 .on('click', function(d, i){
-                                                    curElem.remove();
+
+                                                    var conf = confirm('Confiem Delete?');
+                                                    if(conf){
+                                                        curElem.remove();
+                                                    }
                                                     d3.select(this).style('display', 'none');
+
+
                                                 })
                                         ;
 
