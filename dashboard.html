@@ -149,6 +149,9 @@
                 .attr('y', d3.event.y - parseInt(d3.select(this).attr("height")) / 2)
     }
 
+
+
+
     var drag = d3.behavior.drag()
                     .on("drag", move)
                     .on("dragend", function(d){
@@ -168,6 +171,7 @@
                                     .attr('y', mouseLoc[1])
                                     .attr('initial-y', mouseLoc[1])
                                     .attr('xlink:href', elem.attr('href'))
+
                                     .on('contextmenu', function(d, i){
                                         var curElem = d3.select(this);
                                         d3.event.preventDefault();
@@ -221,6 +225,13 @@
                     })
             ;
 
+    var tooltip = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            ;
+
     mainLayout.selectAll("image")
 
             .data(icons)
@@ -229,6 +240,7 @@
             .attr("xlink:href", function(d){
                 return "images/icons/"+d;
             })
+
             .attr('class','drg')
             .attr("width", w)
             .attr("height", h)
@@ -246,7 +258,15 @@
             .attr('initial-y', function(d, i){
                 return coordinates[i][1];
             })
+
+            .on("mouseover", function(){ return tooltip.text('aaa') && tooltip.style("visibility", "visible");})
+//            .on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+            .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
             .call(drag)
+            .append('svg:title')
+            .text(function(d){
+                return d.split('.')[0];
+            })
 
 
     ;
