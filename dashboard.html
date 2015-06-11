@@ -13,8 +13,11 @@
     <script src="js/live.js"></script>
 
 
+
 </head>
 <body>
+
+
 
 <div id="elem-right-click" style="display: none; width:40px; height: 100px">
     <button type="button" name="name" value="delete" >Delete</button>
@@ -204,6 +207,7 @@
                                             if(conf){
                                                 curElem.remove();
                                             }
+
                                             d3.select(this).style('display', 'none');
 
 
@@ -369,13 +373,15 @@
         width : streamsConfig.width
     };
 
-    var ptree = [['P0','C0','C1','C2','C4','c5','c6'],['P1','C0','C1','C2']];
+    var ptree = [['Input Stream','Child One','Child Two','Child Three','Child Four'],['Output Stream','Child One','Child Two','Child Three']];
     drawTree(rectObj,ptree);
 
     function drawTree(rectElementObj, tree){
 
-        var rectObjects = getRectObjects(rectElementObj,tree);
+        var allObjects = getRectObjects(rectElementObj,tree);
         var textObjects = getTextObjects(rectElementObj,tree);
+        var rectObjects = allObjects[0];
+        var lineObjects = allObjects[1];
 
 
         var rectangles = mainLayout
@@ -397,6 +403,19 @@
                 .attr("draggable",function(d){return d.drag;})
                 .call(dragStream)
         ;
+
+        var lines = mainLayout.selectAll("line")
+                .data(lineObjects)
+                .enter()
+                .append("line");
+
+        var lineAttributes = lines
+                .attr("x1", function (d) { return d.x1; })
+                .attr("x2", function (d) { return d.x2; })
+                .attr("y1", function (d) { return d.y1; })
+                .attr("y2", function (d) { return d.y2; })
+                .attr("stroke", function (d) { return "black"; })
+                .style("stroke-width", function(d) { return "1 px"; });
 
 
         var texts = mainLayout
@@ -420,6 +439,7 @@
         var x0 = Number(rectElementObj.x)+ 20;
         var y0 = Number(rectElementObj.y) + 30;
         var height = Number(rectElementObj.height) - 40;
+        var width = Number(rectElementObj.width) - 20;
 
         var parentOne = tree[0];
         var parentTwo = tree[1];
@@ -433,25 +453,25 @@
         var rectangles = (lenInput+ lenOutput);
         var gaps = rectangles - 1;
         var sizeOfGap = 5;
-        var sizeOfRect = Math.round((height - (sizeOfGap * gaps)) / rectangles);
-
+        var heightOfRect = Math.round((height - (sizeOfGap * gaps)) / rectangles);
+        var widthOfRect = Math.round(width * 0.4);
 
         var parents = [{},{},{},
             {
                 id:"one",
                 x : x0,
                 y : y0,
-                width : sizeOfRect,
-                height : sizeOfRect,
+                width : widthOfRect,
+                height : heightOfRect,
                 drag : 'false'
 
             },
             {
                 id:"two",
                 x : x0,
-                y : y0 + (lenInput * sizeOfGap) + ((lenInput) * sizeOfRect),
-                width : sizeOfRect,
-                height : sizeOfRect,
+                y : y0 + (lenInput * sizeOfGap) + ((lenInput) * heightOfRect),
+                width : widthOfRect,
+                height : heightOfRect,
                 drag : 'false'
 
             }];
@@ -460,10 +480,10 @@
         for (var i = 0; i < lenInput - 1; i++) {
             childA[i] =
             {
-                x: x0 + sizeOfRect,
-                y: y0 + ((i + 1 ) * sizeOfRect) + ((i + 1) * sizeOfGap),
-                width: sizeOfRect,
-                height: sizeOfRect,
+                x: x0 + widthOfRect,
+                y: y0 + ((i + 1 ) * heightOfRect) + ((i + 1) * sizeOfGap),
+                width: widthOfRect,
+                height: heightOfRect,
                 drag : 'true'
             }
         }
@@ -472,16 +492,82 @@
         for (var j = 0; j < lenOutput - 1; j++) {
             childB[j] =
             {
-                x: x0 + sizeOfRect,
-                y: (y0 + (lenInput * sizeOfGap) + ((lenInput) * sizeOfRect)) +((j + 1 )* sizeOfRect) + ((j + 1)* sizeOfGap),
-                width :sizeOfRect,
-                height :sizeOfRect,
+                x: x0 + widthOfRect,
+                y: (y0 + (lenInput * sizeOfGap) + ((lenInput) * heightOfRect)) +((j + 1 )* heightOfRect) + ((j + 1)* sizeOfGap),
+                width :widthOfRect,
+                height :heightOfRect,
                 drag : 'true'
             }
         }
 
 
-        return parents.concat(childA,childB);
+        var rectObj = parents.concat(childA,childB);
+
+
+        var vertLine =[];
+        if(lenOutput==1){
+            vertLine = [
+                {   x1: x0 + Math.round(widthOfRect/2),
+                    x2: x0 + Math.round(widthOfRect/2),
+                    y1: y0 + heightOfRect,
+                    y2: y0 + (lenInput * sizeOfGap) + (lenInput * heightOfRect)
+                },
+                {   x1: x0 + Math.round(widthOfRect/2),
+                    x2: x0 + Math.round(widthOfRect/2),
+                    y1: y0 + (lenInput * sizeOfGap) + ((lenInput + 1) * heightOfRect),
+                    y2: (y0 + (lenInput * sizeOfGap) + ((lenInput + 1) * heightOfRect))
+                }
+            ];
+        }
+        else{
+            vertLine = [
+                {   x1: x0 + Math.round(widthOfRect/2),
+                    x2: x0 + Math.round(widthOfRect/2),
+                    y1: y0 + heightOfRect,
+                    y2: y0 + (lenInput * sizeOfGap) + (lenInput * heightOfRect)
+                },
+                {   x1: x0 + Math.round(widthOfRect/2),
+                    x2: x0 + Math.round(widthOfRect/2),
+                    y1: y0 + (lenInput * sizeOfGap) + ((lenInput + 1) * heightOfRect),
+                    y2: (y0 + (lenInput * sizeOfGap) + ((lenInput + 1) * heightOfRect)) + ((lenOutput -1) *(sizeOfGap)) + (((2 * lenOutput) -3) * Math.round(heightOfRect/2))
+                }
+            ];
+        }
+
+
+
+        var horiLineA =[];
+        var horiLineB =[];
+
+
+        for (var j = 0; j < lenInput - 1; j++) {
+            horiLineA[j] =
+            {
+                x1: x0 + Math.round(widthOfRect/2),
+                x2: x0 + widthOfRect,
+                y1: y0 + ((j + 1) *(sizeOfGap)) + ((j + 1) * (heightOfRect)) + Math.round(heightOfRect/2),
+                y2: y0 + ((j + 1) *(sizeOfGap)) + ((j + 1) * (heightOfRect)) + Math.round(heightOfRect/2)
+            }
+        }
+
+        for (var j = 0; j < lenOutput - 1; j++) {
+            horiLineB[j] =
+            {
+                x1: x0 + Math.round(widthOfRect/2),
+                x2: x0 + widthOfRect,
+                y1: (y0 + (lenInput * ( heightOfRect + sizeOfGap))) + ((j + 1) * (sizeOfGap + heightOfRect)) + Math.round(heightOfRect/2),
+                y2: (y0 + (lenInput * ( heightOfRect + sizeOfGap))) + ((j + 1) * (sizeOfGap + heightOfRect)) + Math.round(heightOfRect/2)
+            }
+        }
+
+        var lineObj = vertLine.concat(horiLineA,horiLineB);
+
+        var allObj = [rectObj,lineObj];
+
+        return allObj;
+//        return rectObj;
+
+
 
     }
 
@@ -491,6 +577,7 @@
         var x0 = Number(rectElementObj.x)+ 20;
         var y0 = Number(rectElementObj.y) + 30;
         var height = Number(rectElementObj.height) - 40;
+        var width = Number(rectElementObj.width) - 20;
 
         var parentOne = tree[0];
         var parentTwo = tree[1];
@@ -504,20 +591,21 @@
         var rectangles = (lenInput+ lenOutput);
         var gaps = rectangles - 1;
         var sizeOfGap = 5;
-        var sizeOfRect = Math.round((height - (sizeOfGap * gaps)) / rectangles);
+        var heightOfRect = Math.round((height - (sizeOfGap * gaps)) / rectangles);
+        var widthOfRect = Math.round(width * 0.4);
 
 
         var parents = [{},{},
             {
                 text : input,
-                x : x0 + sizeOfRect + sizeOfGap,
-                y : y0 +Math.round( 2 * sizeOfRect/3)
+                x : x0+sizeOfGap,
+                y : y0 +Math.round( 2 * heightOfRect/3)
 
             },
             {
                 text : output,
-                x : x0 + sizeOfRect + sizeOfGap,
-                y : y0 + (lenInput * sizeOfGap) + ((lenInput) * sizeOfRect) + Math.round( 2 * sizeOfRect/3)
+                x : x0+sizeOfGap,
+                y : y0 + (lenInput * sizeOfGap) + ((lenInput) * heightOfRect) + Math.round( 2 * heightOfRect/3)
 
             }];
 
@@ -526,8 +614,8 @@
             childA[i] =
             {
                 text : parentOne[i+1],
-                x: (x0 + sizeOfRect) + sizeOfRect + sizeOfGap,
-                y: y0 + ((i + 1 ) * sizeOfRect) + ((i + 1) * sizeOfGap) + Math.round( 2 * sizeOfRect/3)
+                x: x0 + widthOfRect + sizeOfGap,
+                y: y0 + ((i + 1 ) * heightOfRect) + ((i + 1) * sizeOfGap) + Math.round( 2 * heightOfRect/3)
             }
         }
 
@@ -536,8 +624,8 @@
             childB[j] =
             {
                 text : parentTwo[j+1],
-                x: x0 + sizeOfRect + sizeOfRect + sizeOfGap,
-                y: (y0 + (lenInput * sizeOfGap) + ((lenInput) * sizeOfRect)) +((j + 1 )* sizeOfRect) + ((j + 1)* sizeOfGap) + Math.round( 2 * sizeOfRect/3)
+                x: x0 + widthOfRect + sizeOfGap,
+                y: (y0 + (lenInput * sizeOfGap) + ((lenInput) * heightOfRect)) +((j + 1 )* heightOfRect) + ((j + 1)* sizeOfGap) + Math.round( 2 * heightOfRect/3)
 
             }
         }
