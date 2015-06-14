@@ -32,7 +32,10 @@
         oldLinkElements = {},
         interval = 1000,
         loaded = false,
-        active = { "html": 1, "css": 1, "js": 1 };
+        active = {
+            "html": 1,
+            //"css": 1,
+            "js": 1 };
 
     var Live = {
 
