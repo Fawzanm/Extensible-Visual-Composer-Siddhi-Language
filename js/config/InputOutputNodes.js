@@ -18,14 +18,14 @@ var nodeBeta =
 };var nodeGamma =
 
 {
-    connectionName : 'SecureSecureStockQuoteStream',
+    connectionName : 'SecureStockLargeName',
     connectionType :'Stream',
     connectionTypeDetails : 'para1:string, para2:int'
 
 };var nodeTheta =
 
 {
-    connectionName : 'SecureStockStockQuoteStream',
+    connectionName : 'StreamWithVeryVeryLargeName',
     connectionType :'Stream',
     connectionTypeDetails : 'para1:string, para2:int'
 

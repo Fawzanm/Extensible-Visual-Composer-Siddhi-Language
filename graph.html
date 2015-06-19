@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="all" type="text/css"/>
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet" media="all" type="text/css"/>
+    <link href="css/custom.css" rel="stylesheet" media="all" type="text/css"/>
+    <!--<script src="js/jquery-2.1.3.min.js"></script>-->
+    <!--<script src="js/bootstrap.min.js"></script>-->
+    <script src="js/d3.v3.min.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/live.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+
+<svg id="main" width="500" height="500" style="background-color: #28a4c9"></svg>
+
+
+<script>
+
+    var svg = d3.select('#main');
+
+    var a = {x:100, y:100, id:'a'};
+    var b = {x:300, y:200, id:'b'};
+    var c = {x:200, y:300, id:'c'};
+
+    var height = 50, width = 50;
+    var rectangles = [a, b, c];
+
+    var currentLine = {
+
+        state:false,
+        lineId:false,
+        sourceNodeId:false,
+        targetNodeId:false
+
+    };
+
+    function resetLine(){
+        currentLine.state = false;
+        currentLine.lineId = false;
+        currentLine.sourceNodeId = false;
+        currentLine.targetNodeId = false;
+
+    }
+
+    var graph = {};
+
+    svg.selectAll('rect')
+            .data(rectangles)
+            .enter()
+            .append('g')
+            .attr('class', 'group')
+            .append('rect')
+            .attr('id', function(d){
+                return d.id;
+            })
+            .attr('x', function(d){
+                return d.x;
+            })
+            .attr('y', function(d){
+                return d.y;
+            })
+            .attr('width', width)
+            .attr('height', height)
+            .style('fill', 'blue')
+            .on('mouseover', function(d){
+//                console.log('hover on rect');
+                drawCircle(this, 'in');
+                drawCircle(this, 'out');
+            })
+            .on('mouseout', function(d){
+
+                d3.selectAll('circle').style('visibility', 'hidden');
+
+            })
+            .call(d3.behavior.drag()
+                    .on('drag', move))
+    ;
+
+    function getNodeId(rect, conType){
+        if(conType == 'in')
+            return (rect).attr('id') + '-' + 'in';
+        else
+            return (rect).attr('id') + '-' + 'out';
+
+    }
+
+    function getNode(rect, conType){
+
+        var targetRect = d3.select(rect);
+
+        var x = 0, y = 0, r = 0, nodeClass = '', nodeId = '';
+
+        var rectHeight = parseFloat(targetRect.attr('height'));
+        var rectWidth = parseFloat(targetRect.attr('width'));
+        var rectX = parseFloat(targetRect.attr('x'));
+        var rectY = parseFloat(targetRect.attr('y'));
+
+        y = rectY + rectHeight/2;
+        r  = rectHeight/8;
+
+        nodeId = getNodeId(targetRect, conType);
+
+        if(conType == 'in'){
+            x = rectX;
+            nodeClass = 'inputCon';
+
+        }else{
+            x = rectX + rectWidth;
+            nodeClass = 'outputCon';
+        }
+
+        var nodeInfo = {
+            cx : x,
+            cy : y,
+            r : r,
+            id: nodeId,
+            class : nodeClass
+        };
+
+        return nodeInfo;
+    }
+
+    function drawCircle(rect, conType){
+
+
+        var g = d3.select(rect.parentNode);
+
+            var conNode = getNode(rect, conType);
+
+            if(d3.select('#'+conNode.id).empty()){
+                g.append('circle')
+                        .attr('cx', conNode.cx)
+                        .attr('cy', conNode.cy)
+                        .attr('r', conNode.r)
+                        .attr('class', conNode.class)
+                        .attr('id', conNode.id)
+                        .on('mouseover', function(){
+                            svg.on('mousemove', null);
+                            d3.select(this).style('visibility', 'visible')
+
+                        })
+                        .on('mouseout', function(){
+                            svg.on('mousemove', function () {
+
+                                var line = d3.select('#'+currentLine.lineId);
+                                line.attr('x2', d3.mouse(this)[0]);
+                                line.attr('y2', d3.mouse(this)[1]);
+                                console.log(currentLine.sourceNodeId);
+
+                            });
+                        })
+                        .on('dblclick', function(){
+
+                            if(currentLine.state == false) {
+                                currentLine.lineId = drawLine(this, svg);
+                                currentLine.state = true;
+                                currentLine.sourceNodeId = d3.select(this).attr('id');
+                                registerLine(this);
+
+
+                                svg.on('mousemove', function () {
+
+                                    var line = d3.select('#'+currentLine.lineId);
+                                    line.attr('x2', d3.mouse(this)[0]);
+                                    line.attr('y2', d3.mouse(this)[1]);
+                                    console.log(currentLine.sourceNodeId);
+
+
+                                });
+
+                            }
+
+
+                        })
+                        .on('mousedown', function(){
+                            console.log('mouse up');
+
+                            if(currentLine.state == true){
+                                console.log('state : true');
+                                svg.on('mousemove', null);
+//                                svg.on('mousedown', null);
+
+                                var line = d3.select('#'+currentLine.lineId);
+                                line.attr('x2', d3.select(this).attr('cx'));
+                                line.attr('y2', d3.select(this).attr('cy'));
+//                                registerLine(this);
+                                currentLine.targetNodeId = d3.select(this).attr('id');
+                                console.log(currentLine);
+                                registerLine();
+                                resetLine();
+//
+//                                currentLine.state = false;
+//                                currentLine.lineId =false;
+//                                currentLine.sourceNodeId = false;
+
+                            }
+
+
+                        })
+
+
+                ;
+            }else{
+                d3.select('#'+conNode.id).style('visibility', 'visible');
+            }
+
+
+
+
+    }
+
+    function drawLine(node, svg){
+
+        var startNode = d3.select(node);
+        var lineId = 'line'+'-'+startNode.attr('id');
+
+        if(d3.select('#'+lineId).empty()){
+
+
+            var line = svg.append('line')
+                    .attr('x1', startNode.attr('cx'))
+                    .attr('y1', startNode.attr('cy'))
+                    .attr('x2', 400)
+                    .attr('y2', 400)
+                    .attr('id', lineId)
+                    .style('stroke', 'black');
+
+            return lineId;
+
+        }else{
+            return null;
+        }
+
+
+    }
+
+
+
+    function move() {
+        //lineID will gve the id of the line.
+
+        var g = d3.select(this.parentNode);
+        var rightCircle = g.select('.outputCon');
+        var leftCircle = g.select('.inputCon');
+
+
+        var rectId = d3.select(this).attr('id');
+        var lineIn = graph[rectId].inLineId;
+        var lineOut = graph[rectId].outLineId;
+
+        var me =this;
+
+        console.log('----------');
+        console.log(lineIn);
+        console.log(lineOut);
+        console.log('----------');
+
+//        var LineID = d3.select('ax');
+        var nx = d3.event.x-parseInt(d3.select(me).attr("width"))/2;
+        var ny = d3.event.y-parseInt(d3.select(me).attr("height"))/2;
+        d3.select(me).attr('x', nx)
+                .attr('y', ny);
+
+
+        var leftCoord = getNode(this, 'in');
+        var rightCoord = getNode(this, 'out');
+
+        rightCircle.attr('cx', leftCoord.cx);
+        rightCircle.attr('cy', leftCoord.cy);
+
+        leftCircle.attr('cx', rightCoord.cx);
+        leftCircle.attr('cy', rightCoord.cy);
+
+
+
+        //change the line's x and y on dragging
+        //if source update the x1 and y1
+
+        var inX, inY;
+        var iX, iY;
+
+        if(lineIn && lineIn.split('-')[1] == rectId){
+            inX = 'x1';
+            inY = 'y1';
+
+            iX = leftCoord.cx;
+            iY = leftCoord.cy;
+
+
+        }else{
+            inX='x2';
+            inY='y2';
+
+            iX = leftCoord.cx;
+            iY = leftCoord.cy;
+
+        }
+
+        var outX, outY;
+        var oX, oY;
+
+        if( lineOut && lineOut.split('-')[1] == rectId ){
+            outX = 'x1';
+            outY = 'y1';
+
+            oX = rightCoord.cx;
+            oY = rightCoord.cy;
+
+        }else{
+            outX = 'x2';
+            outY = 'y2';
+
+            oX = rightCoord.cx;
+            oY = rightCoord.cy;
+        }
+
+        console.log('in : ' + lineIn);
+        console.log('out : ' + lineOut);
+
+        console.log('input x '+ inX + ' : ' + iX);
+        console.log('input Y '+ inY + 'coord : ' + iY);
+
+        console.log('input x '+ outX + ' : ' + oX);
+        console.log('input Y '+ outY + 'coord : ' + oY);
+
+
+        d3.select('#'+lineIn).attr(''+inX, iX);
+        d3.select('#'+lineIn).attr(''+inY, iY);
+
+        d3.select('#'+lineOut).attr(''+outX, oX);
+        d3.select('#'+lineOut).attr(''+outY, oY);
+
+
+    }
+
+
+    function registerLine(){
+
+
+        console.log('currentLine in : ' + currentLine.sourceNodeId);
+        console.log('currentLine out : ' + currentLine.targetNodeId);
+
+        var sourceRect = d3.select('#'+currentLine.sourceNodeId);
+        var sourceRectId = d3.select(sourceRect.node().parentNode).select('rect').attr('id');
+
+        var targetRect = d3.select('#'+currentLine.targetNodeId);
+        var targetRectId = d3.select(targetRect.node().parentNode).select('rect').attr('id');
+
+//        console.log('rect id : '+ sourceRect);
+
+        var graphNode;
+
+
+
+        if(graph.hasOwnProperty(sourceRectId)){
+            //update the node //fill this
+
+            graphNode = graph[sourceRectId];
+
+
+        }else{
+
+            graphNode = {
+
+            inSourceId : false,
+            outSourceId : false,
+            inLineId : false,
+            outLineId : false
+
+            };
+            graph[sourceRectId] = graphNode;
+
+        }
+
+        if(currentLine.sourceNodeId.split('-')[1] == 'in'){
+            graphNode.inSourceId = targetRectId;
+            graphNode.inLineId = currentLine.lineId;
+
+        }else{
+            graphNode.outSourceId = targetRectId;
+            graphNode.outLineId = currentLine.lineId;
+
+        }
+
+
+        if(graph.hasOwnProperty(targetRectId)){
+            graphNode = graph[targetRectId];
+
+        }else{
+
+            graphNode = {
+
+                inSourceId : false,
+                outSourceId : false,
+                inLineId : false,
+                outLineId : false
+
+            };
+            graph[targetRectId] = graphNode;
+        }
+
+        if(currentLine.targetNodeId.split('-')[1] == 'in'){
+            graphNode.inSourceId = sourceRectId;
+            graphNode.inLineId = currentLine.lineId;
+
+        }else{
+            graphNode.outSourceId = sourceRectId;
+            graphNode.outLineId = currentLine.lineId;
+        }
+
+    console.log(graph);
+
+
+
+    }
+
+</script>
+
+</body>
+</html>
