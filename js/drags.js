@@ -153,16 +153,7 @@ var operatorDrag = d3.behavior.drag()
                                 .attr('y', mouseLoc[1])
                                 .attr('initial-y', mouseLoc[1])
                                 .call(operatorDragOnQueryBox)
-                                .on('mouseover', function () {
-                                    var group = d3.select(this.parentNode);
-                                    //console.log(group.attr('class'));
-                                    var circles = group.selectAll('circle').style('visibility', 'visible');
-                                })
-                                .on('mouseout', function () {
-                                    var group = d3.select(this.parentNode);
-                                    //console.log(group.attr('class'));
-                                    var circles = group.selectAll('circle').style('visibility', 'hidden');
-                                });
+
 
                         drawCircle('op-' + queryBoxId + (count + 1));
 
@@ -233,6 +224,9 @@ var streamsDrag = d3.behavior.drag()
                 var newGroup = mainLayout.append('g').call(streamsDragOnDrawing);
 
                 var newRect = newGroup.append('rect')
+                        .attr('id', function(){
+                            return title.text()
+                        })
                         .attr('x', mouseLoc[0])
                         .attr('initial-x', mouseLoc[0])
                         .attr('y', mouseLoc[1])
@@ -240,6 +234,16 @@ var streamsDrag = d3.behavior.drag()
                         .attr('height', rect.attr('height'))
                         .attr('width', rect.attr('width'))
                         .style('fill', 'white')
+                        .on('mouseover', function () {
+                            var group = d3.select(this.parentNode);
+                            //console.log(group.attr('class'));
+                            var circles = group.selectAll('circle').style('visibility', 'visible');
+                        })
+                        .on('mouseout', function () {
+                            var group = d3.select(this.parentNode);
+                            //console.log(group.attr('class'));
+                            var circles = group.selectAll('circle').style('visibility', 'hidden');
+                        })
 
                     ;
 
@@ -255,15 +259,22 @@ var streamsDrag = d3.behavior.drag()
                             }
                             return stream_name.substr(0, 18) + '...';
                         })
+                        .on('mouseover', function () {
+                            var group = d3.select(this.parentNode);
+                            //console.log(group.attr('class'));
+                            var circles = group.selectAll('circle').style('visibility', 'visible');
+                        })
                         .append('svg:title')
                         .text(function () {
                             return title.text();
                         })
                     ;
 
+                drawCircle(title.text());
             }
 
         })
+
     ;
 
 var streamsDragOnDrawing = d3.behavior.drag()
@@ -279,6 +290,9 @@ var streamsDragOnDrawing = d3.behavior.drag()
 
         text.attr('x', mouseLoc[0] + 10);
         text.attr('y', mouseLoc[1] + parseFloat(rect.attr('height')) / 2);
+
+        updateNodes(rect.attr('id'));
+
     })
     .on('dragend', function () {
 
@@ -307,6 +321,7 @@ var streamsDragOnDrawing = d3.behavior.drag()
 
         }
 
+        updateNodes(rect.attr('id'));
 
     });
 

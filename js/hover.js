@@ -26,7 +26,7 @@ function drawCircle(imageId){
         imageY = parseFloat(image.attr('y'));
 
         y = imageY + imageHeight / 2;
-        r = imageHeight / 8;
+        r = imageHeight / 4;
 
         x_left = imageX;
         x_right = imageX + imageWidth;
@@ -39,7 +39,20 @@ function drawCircle(imageId){
             .attr('cy', y)
             .attr('r', r)
             .style('fill', 'red')
-            .style('visibilty', 'visible')
+            .style('visibility', 'visible')
+            .on('mouseover', function(){
+                d3.select(this)
+                    .style('visibility', 'visible');
+            })
+            .on('mousemove', function(){
+                d3.select(this)
+                    .style('visibility', 'visible');
+            })
+            .on('click', function(){
+                d3.select(this)
+                    .style('visibility', 'visible');
+                d3.stopPropagation();
+            })
         ;
 
         opGroup
@@ -50,8 +63,23 @@ function drawCircle(imageId){
             .attr('cy', y)
             .attr('r', r)
             .style('fill', 'red')
-            .style('visibilty', 'visible')
+            .style('visiblity', 'visible')
+            .on('mouseover', function(){
+                d3.select(this)
+                    .style('visibility', 'visible');
+            })
+            .on('mousemove', function(){
+                d3.select(this)
+                    .style('visibility', 'visible');
+            })
+            .on('click', function(){
+                d3.select(this)
+                    .style('visibility', 'visible');
+                d3.stopPropagation();
+            })
     }
 
 
 }
+
+

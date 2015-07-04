@@ -88,6 +88,11 @@ function drawOperators(operators, operatorsConfig, operatorRectConfig){
 
         })
         .call(operatorDrag)
+        .append('svg:title')
+        .text(function (d, i) {
+            return d.type;
+        })
+
 
 
     ;
