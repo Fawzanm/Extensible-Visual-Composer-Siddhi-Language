@@ -66,16 +66,24 @@ function isInDragZone(zoneArray, x, y) {
 
 var operatorDrag = d3.behavior.drag()
         .on('drag', function () {
+
+        if(d3.event.sourceEvent.button == 0){
+
             var currentElem = d3.select(this);
             var mouseLoc = d3.mouse(this);
             currentElem.attr('x', mouseLoc[0]);
             currentElem.attr('y', mouseLoc[1]);
+
+        }
 
 
 
 
         })
         .on('dragend', function () {
+
+
+        if(d3.event.sourceEvent.button == 0) {
 
             var mouseLoc = d3.mouse(this);
             var elem = d3.select(this);
@@ -88,21 +96,26 @@ var operatorDrag = d3.behavior.drag()
                 if (elem.attr('type') == 'query') {
 
                     var queryElem = mainLayout
-                        .append('g')
-                        .attr('class', 'query-group')
-                        .append('svg:image')
-                        .attr('id', function () {
-                            return "query-" + (queryBoxZones.length + 1)
-                        })
-                        .attr('xlink:href', elem.attr('href'))
-                        .attr('type', elem.attr('type'))
-                        .attr('width', elem.attr('width') * 3)
-                        .attr('height', elem.attr('height') * 3)
-                        .attr('x', mouseLoc[0])
-                        .attr('initial-x', mouseLoc[0])
-                        .attr('y', mouseLoc[1])
-                        .attr('initial-y', mouseLoc[1])
-                        .call(queryBoxDragonDrawing);
+                            .append('g')
+                            .attr('class', 'query-group')
+                            .append('svg:image')
+                            .attr('id', function () {
+                                return "query-" + (queryBoxZones.length + 1)
+                            })
+                            .attr('xlink:href', elem.attr('href'))
+                            .attr('type', elem.attr('type'))
+                            .attr('width', elem.attr('width') * 3)
+                            .attr('height', elem.attr('height') * 3)
+                            .attr('x', mouseLoc[0])
+                            .attr('initial-x', mouseLoc[0])
+                            .attr('y', mouseLoc[1])
+                            .attr('initial-y', mouseLoc[1])
+                            .call(queryBoxDragonDrawing)
+                            .on('contextmenu', function () {
+                                d3.stopPropagation();
+                                return null;
+                            })
+                        ;
 
                     queryBoxZones.push({
                         id: queryElem.attr('id'),
@@ -183,14 +196,17 @@ var operatorDrag = d3.behavior.drag()
             currentElem.attr('x', currentElem.attr('initial-x'));
             currentElem.attr('y', currentElem.attr('initial-y'));
 
+        }
 
         })
+
     ;
 
 
 var streamsDrag = d3.behavior.drag()
         .on('drag', function () {
 
+        if(d3.event.sourceEvent.button == 0){
             var currentGroup = d3.select(this);
             var rect = currentGroup.select('rect');
             var text = currentGroup.select('text');
@@ -203,8 +219,13 @@ var streamsDrag = d3.behavior.drag()
             text.attr('x', mouseLoc[0] + 10);
             text.attr('y', mouseLoc[1] + parseFloat(rect.attr('height')) / 2);
 
+        }
+
         })
         .on('dragend', function () {
+
+        if(d3.event.sourceEvent.button == 0) {
+
 
             var currentGroup = d3.select(this);
             var rect = currentGroup.select('rect');
@@ -221,10 +242,11 @@ var streamsDrag = d3.behavior.drag()
 
             if (isInDragZone(drawingZone, mouseLoc[0], mouseLoc[1])) {
 
-                var newGroup = mainLayout.append('g').call(streamsDragOnDrawing);
+                var newGroup = mainLayout.append('g')
+                    .call(streamsDragOnDrawing);
 
                 var newRect = newGroup.append('rect')
-                        .attr('id', function(){
+                        .attr('id', function () {
                             return title.text()
                         })
                         .attr('x', mouseLoc[0])
@@ -273,139 +295,156 @@ var streamsDrag = d3.behavior.drag()
                 drawCircle(title.text());
             }
 
+        }
         })
 
     ;
 
 var streamsDragOnDrawing = d3.behavior.drag()
     .on('drag', function () {
-        var currentGroup = d3.select(this);
-        var rect = currentGroup.select('rect');
-        var text = currentGroup.select('text');
 
-        var mouseLoc = d3.mouse(this);
+        if(d3.event.sourceEvent.button == 0) {
 
-        rect.attr('x', mouseLoc[0]);
-        rect.attr('y', mouseLoc[1]);
+            var currentGroup = d3.select(this);
+            var rect = currentGroup.select('rect');
+            var text = currentGroup.select('text');
 
-        text.attr('x', mouseLoc[0] + 10);
-        text.attr('y', mouseLoc[1] + parseFloat(rect.attr('height')) / 2);
+            var mouseLoc = d3.mouse(this);
 
-        updateNodes(rect.attr('id'));
+            rect.attr('x', mouseLoc[0]);
+            rect.attr('y', mouseLoc[1]);
 
+            text.attr('x', mouseLoc[0] + 10);
+            text.attr('y', mouseLoc[1] + parseFloat(rect.attr('height')) / 2);
+
+            updateNodes(rect.attr('id'));
+
+        }
     })
     .on('dragend', function () {
 
-        var currentGroup = d3.select(this);
-        var rect = currentGroup.select('rect');
-        var text = currentGroup.select('text');
+        if(d3.event.sourceEvent.button == 0) {
 
-        var mouseLoc = d3.mouse(this);
-        if (isInDragZone(drawingZone, mouseLoc[0], mouseLoc[1])) {
+            var currentGroup = d3.select(this);
+            var rect = currentGroup.select('rect');
+            var text = currentGroup.select('text');
 
-            rect.attr('initial-x', mouseLoc[0]);
-            rect.attr('initial-y', mouseLoc[1]);
+            var mouseLoc = d3.mouse(this);
+            if (isInDragZone(drawingZone, mouseLoc[0], mouseLoc[1])) {
 
-            text.attr('initial-x', mouseLoc[0] + 10);
-            text.attr('initial-y', mouseLoc[1] + parseFloat(rect.attr('height')) / 2);
+                rect.attr('initial-x', mouseLoc[0]);
+                rect.attr('initial-y', mouseLoc[1]);
 
-        } else {
-            //console.log('not in drag zone');
-            //console.log('x : ' + rect.attr('x'));
-            //console.log('y : ' + rect.attr('y'));
-            rect.attr('x', rect.attr('initial-x'));
-            rect.attr('y', rect.attr('initial-y'));
+                text.attr('initial-x', mouseLoc[0] + 10);
+                text.attr('initial-y', mouseLoc[1] + parseFloat(rect.attr('height')) / 2);
 
-            text.attr('x', text.attr('initial-x'));
-            text.attr('y', text.attr('initial-y'));
+            } else {
+                //console.log('not in drag zone');
+                //console.log('x : ' + rect.attr('x'));
+                //console.log('y : ' + rect.attr('y'));
+                rect.attr('x', rect.attr('initial-x'));
+                rect.attr('y', rect.attr('initial-y'));
+
+                text.attr('x', text.attr('initial-x'));
+                text.attr('y', text.attr('initial-y'));
+
+            }
+
+            updateNodes(rect.attr('id'));
 
         }
-
-        updateNodes(rect.attr('id'));
-
     });
 
 
 var queryBoxDragonDrawing = d3.behavior.drag()
     .on('drag', function () {
-        var queryBox = d3.select(this);
-        var mouseLoc = d3.mouse(this);
 
-        queryBox.attr('x', mouseLoc[0]);
-        queryBox.attr('y', mouseLoc[1]);
+        if(d3.event.sourceEvent.button == 0) {
 
-        var arr = opsInQueryBox[queryBox.attr('id')];
+            var queryBox = d3.select(this);
+            var mouseLoc = d3.mouse(this);
 
-        arr.forEach(function (d) {
-            var elem = d3.select('#' + d);
-            elem.attr('x', mouseLoc[0] - parseFloat(queryBox.attr('initial-x')) + parseFloat(elem.attr('initial-x')));
-            elem.attr('y', mouseLoc[1] - parseFloat(queryBox.attr('initial-y')) + parseFloat(elem.attr('initial-y')));
+            queryBox.attr('x', mouseLoc[0]);
+            queryBox.attr('y', mouseLoc[1]);
 
-            updateNodes(d);
+            var arr = opsInQueryBox[queryBox.attr('id')];
 
-        });
+            arr.forEach(function (d) {
+                var elem = d3.select('#' + d);
+                elem.attr('x', mouseLoc[0] - parseFloat(queryBox.attr('initial-x')) + parseFloat(elem.attr('initial-x')));
+                elem.attr('y', mouseLoc[1] - parseFloat(queryBox.attr('initial-y')) + parseFloat(elem.attr('initial-y')));
+
+                updateNodes(d);
 
 
+            });
+
+        }
         //console.log('dragging query box : ' + arr.length );
         //console.log(opsInQueryBox);
 
     })
     .on('dragend', function () {
-        var queryBox = d3.select(this);
-        var mouseLoc = d3.mouse(this);
 
-        if (isInDragZone(drawingZone, mouseLoc[0], mouseLoc[1])) {
-            queryBox.attr('x', mouseLoc[0]);
-            queryBox.attr('initial-x', mouseLoc[0]);
-            queryBox.attr('y', mouseLoc[1]);
-            queryBox.attr('initial-y', mouseLoc[1]);
+        if(d3.event.sourceEvent.button == 0) {
 
+            var queryBox = d3.select(this);
+            var mouseLoc = d3.mouse(this);
 
-            var arr = opsInQueryBox[queryBox.attr('id')];
-
-            arr.forEach(function (d) {
-                var elem = d3.select('#' + d);
-                //elem.attr('initial-x', mouseLoc[0] - parseFloat(queryBox.attr('initial-x')) + parseFloat(elem.attr('initial-x')));
-                //elem.attr('initial-y', mouseLoc[1] - parseFloat(queryBox.attr('initial-y')) + parseFloat(elem.attr('initial-y')));
-
-                elem.attr('initial-x', elem.attr('x'));
-                elem.attr('initial-y', elem.attr('y'));
-                updateNodes(d);
+            if (isInDragZone(drawingZone, mouseLoc[0], mouseLoc[1])) {
+                queryBox.attr('x', mouseLoc[0]);
+                queryBox.attr('initial-x', mouseLoc[0]);
+                queryBox.attr('y', mouseLoc[1]);
+                queryBox.attr('initial-y', mouseLoc[1]);
 
 
-            });
+                var arr = opsInQueryBox[queryBox.attr('id')];
 
-            console.log('q : ' + queryBox.attr('id'));
-            queryBoxZones.forEach(function (d, i) {
-                if (d.id == queryBox.attr('id')) {
+                arr.forEach(function (d) {
+                    var elem = d3.select('#' + d);
+                    //elem.attr('initial-x', mouseLoc[0] - parseFloat(queryBox.attr('initial-x')) + parseFloat(elem.attr('initial-x')));
+                    //elem.attr('initial-y', mouseLoc[1] - parseFloat(queryBox.attr('initial-y')) + parseFloat(elem.attr('initial-y')));
 
-                    queryBoxZones[i]['x'] = queryBox.attr('x');
-                    queryBoxZones[i]['y'] = queryBox.attr('y');
-                    queryBoxZones[i]['initial-x'] = queryBox.attr('x');
-                    queryBoxZones[i]['initial-y'] = queryBox.attr('y');
-                }
-            });
-
-            //console.log('q bbb: '+JSON.stringify(queryBoxZones));
+                    elem.attr('initial-x', elem.attr('x'));
+                    elem.attr('initial-y', elem.attr('y'));
+                    updateNodes(d);
 
 
-        } else {
-            queryBox.attr('x', queryBox.attr('initial-x'));
-            queryBox.attr('y', queryBox.attr('initial-y'));
-            var arr = opsInQueryBox[queryBox.attr('id')];
+                });
 
-            arr.forEach(function (d) {
-                var elem = d3.select('#' + d);
-                //elem.attr('initial-x', mouseLoc[0] - parseFloat(queryBox.attr('initial-x')) + parseFloat(elem.attr('initial-x')));
-                //elem.attr('initial-y', mouseLoc[1] - parseFloat(queryBox.attr('initial-y')) + parseFloat(elem.attr('initial-y')));
+                console.log('q : ' + queryBox.attr('id'));
+                queryBoxZones.forEach(function (d, i) {
+                    if (d.id == queryBox.attr('id')) {
 
-                elem.attr('x', elem.attr('initial-x'));
-                elem.attr('y', elem.attr('initial-y'));
+                        queryBoxZones[i]['x'] = queryBox.attr('x');
+                        queryBoxZones[i]['y'] = queryBox.attr('y');
+                        queryBoxZones[i]['initial-x'] = queryBox.attr('x');
+                        queryBoxZones[i]['initial-y'] = queryBox.attr('y');
+                    }
+                });
 
-                updateNodes(d);
+                //console.log('q bbb: '+JSON.stringify(queryBoxZones));
 
-            });
 
+            } else {
+                queryBox.attr('x', queryBox.attr('initial-x'));
+                queryBox.attr('y', queryBox.attr('initial-y'));
+                var arr = opsInQueryBox[queryBox.attr('id')];
+
+                arr.forEach(function (d) {
+                    var elem = d3.select('#' + d);
+                    //elem.attr('initial-x', mouseLoc[0] - parseFloat(queryBox.attr('initial-x')) + parseFloat(elem.attr('initial-x')));
+                    //elem.attr('initial-y', mouseLoc[1] - parseFloat(queryBox.attr('initial-y')) + parseFloat(elem.attr('initial-y')));
+
+                    elem.attr('x', elem.attr('initial-x'));
+                    elem.attr('y', elem.attr('initial-y'));
+
+                    updateNodes(d);
+
+                });
+
+
+            }
 
         }
     });
@@ -413,34 +452,40 @@ var queryBoxDragonDrawing = d3.behavior.drag()
 
 var operatorDragOnQueryBox = d3.behavior.drag()
     .on('drag', function () {
-        var elem = d3.select(this);
-        var mouseLoc = d3.mouse(this);
-        elem.attr('x', mouseLoc[0]);
-        elem.attr('y', mouseLoc[1]);
+
+        if(d3.event.sourceEvent.button == 0) {
+
+            var elem = d3.select(this);
+            var mouseLoc = d3.mouse(this);
+            elem.attr('x', mouseLoc[0]);
+            elem.attr('y', mouseLoc[1]);
 
 
-        updateNodes(elem.attr('id'));
-
+            updateNodes(elem.attr('id'));
+        }
 
     })
     .on('dragend', function () {
 
-        var elem = d3.select(this);
-        var mouseLoc = d3.mouse(this);
+        if(d3.event.sourceEvent.button == 0) {
 
-        if (isInDragZone(queryBoxZones, mouseLoc[0], mouseLoc[1])) {
-            elem.attr('x', mouseLoc[0]);
-            elem.attr('y', mouseLoc[1]);
-            elem.attr('initial-x', mouseLoc[0]);
-            elem.attr('initial-y', mouseLoc[1]);
-        } else {
 
-            elem.attr('x', elem.attr('initial-x'));
-            elem.attr('y', elem.attr('initial-y'));
-            updateNodes(elem.attr('id'));
+            var elem = d3.select(this);
+            var mouseLoc = d3.mouse(this);
 
+            if (isInDragZone(queryBoxZones, mouseLoc[0], mouseLoc[1])) {
+                elem.attr('x', mouseLoc[0]);
+                elem.attr('y', mouseLoc[1]);
+                elem.attr('initial-x', mouseLoc[0]);
+                elem.attr('initial-y', mouseLoc[1]);
+            } else {
+
+                elem.attr('x', elem.attr('initial-x'));
+                elem.attr('y', elem.attr('initial-y'));
+                updateNodes(elem.attr('id'));
+
+            }
         }
-
     });
 
 
